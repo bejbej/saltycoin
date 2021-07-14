@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<style>
+    body {
+        background-color: black;
+        font-family: sans-serif;
+    }
+    h1 {
+        text-align: center;
+        color: white;
+    }
+    #up {
+        color: green;
+    }
+    #down {
+        color: red;
+    }
+</style>
+<body>
+    <h1>SaltCoin $<span id=currentValue></span><span id=up>▲</span><span id=down>▼</span></h1>
+    <canvas id=chart></canvas>
+</body>
+<script src="./chart-container.js"></script>
+<script src="./chart.min.js"></script>
+<script>
+    const context = document.getElementById("chart").getContext("2d");
+    const upElement = document.getElementById("up");
+    const downElement = document.getElementById("down");
+    const currentValueElement = document.getElementById("currentValue");
+    const chartContainer = new ChartContainer(context);
+
+    async function init() {
+        const url = location.origin + "/api/values";
+        const response = await fetch(url);
+        const rawValues = await response.json();
+        const values = rawValues.map(value => value.toFixed(2));
+        setValues(values);
+        longpoll();
+    }
+
+    async function longpoll() {
+        const url = location.origin + "/api/values/future";
+        const response = await fetch(url);
+        const rawValues = await response.json();
+        const values = rawValues.map(value => value.toFixed(2));
+        setValues(values)
+        window.setTimeout(longpoll);
+    }
+
+    function setValues(values) {
+        chartContainer.setValues(values);
+        const lastIndex = values.length - 1;
+        const secondLastIndex = lastIndex - 1;
+        currentValueElement.textContent = values[lastIndex];
+        if (values[lastIndex] - values[secondLastIndex] > 0) {
+            upElement.style.display = null;
+            downElement.style.display = "none";
+        }
+        else {
+            upElement.style.display = "none";
+            downElement.style.display = null;
+        }
+    }
+
+    init();
+</script>

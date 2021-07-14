@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<textarea id="config"></textarea><br>
+<button id="submit">Submit</button>
+
+<script>
+
+    const textAreaElement = document.getElementById("config");
+    const submitElement = document.getElementById("submit");
+
+    async function init() {
+        const url = location.origin + "/api/config";
+        const response = await fetch(url);
+        const config = await response.json();
+        setConfig(config);
+    }
+
+    function setConfig(config) {
+        textAreaElement.textContent = JSON.stringify(config, null, 2);
+    }
+
+    async function submit() {
+        const url = location.origin + "/api/config";
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: textAreaElement.textContent
+        });
+
+        init();
+    }
+
+    async function longpoll() {
+        const url = location.origin + "/api/config/future";
+        const response = await fetch(url);
+        const config = await response.json();
+        setConfig(config);
+        window.setTimeout(longpoll);
+    }
+
+    submitElement.addEventListener("click", submit);
+    init();
+    longpoll();
+</script>

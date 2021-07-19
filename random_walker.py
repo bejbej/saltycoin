@@ -63,7 +63,7 @@ class RandomWalker:
         Triggers some observers after the calculations have finished.
         '''
 
-        config = self._config.copy()
+        config = self.get_config()
         values = self.get_values()
         skew = config["skew"]
         volatility = config["volatility"]
